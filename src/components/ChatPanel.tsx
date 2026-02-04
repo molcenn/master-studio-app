@@ -57,27 +57,24 @@ export default function ChatPanel() {
     setMessages(prev => [...prev, loadingMsg])
     
     try {
-      // DEMO MODE - Static deployment için mock cevaplar
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000))
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage })
+      })
       
-      const mockResponses = [
-        'Harika! Bu Master Studio projesinde muhteşem işler yapacağız! 🐄',
-        'Anlıyorum. Bu chat panel gerçekten çalışıyor! Ne yapmak istersin?',
-        'Master Studio\'ya hoş geldin! Proje geliştirme için hazırım.',
-        'Bu chat sistemi şu an demo modda. Gerçek API yakında aktif olacak! 🐄',
-        'İlginç soru! Master Studio\'da her şey mümkün.',
-        'Evet! Bu chat paneli tam olarak çalışıyor. API entegrasyonu da hazır.',
-        'Kreatif projeler için buradayım! Nasıl yardımcı olabilirim?'
-      ]
+      const data = await response.json()
       
-      const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)]
+      if (!response.ok) {
+        throw new Error(data.error || 'API hatası')
+      }
       
-      // Loading mesajını kaldır ve mock cevapla değiştir
+      // Loading mesajını kaldır ve gerçek cevapla değiştir
       setMessages(prev => prev.slice(0, -1))
       
       const assistantMsg: Message = {
         role: 'assistant',
-        text: randomResponse,
+        text: data.response || 'Mesaj alındı!',
         time: formatTime(new Date())
       }
       setMessages(prev => [...prev, assistantMsg])
